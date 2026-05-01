@@ -946,33 +946,25 @@ server <- function(input, output, session) {
   # The renderPlotly function generates different types of plots based on the selected analysis type and the user's filter selections.
   # It uses ggplot2 to create the plots and ggplotly
 
-  # This is where the plots coming.
-
-  # The renderPlotly function generates different types of plots based on the selected analysis type and the user's filter selections.
-  # It uses ggplot2 to create the plots and ggplotly
-
-  # This is where the plots coming.
-
-  # The renderPlotly function generates different types of plots based on the selected analysis type and the user's filter selections.
-  # It uses ggplot2 to create the plots and ggplotly
-
   output$analysis_plot <- renderPlotly({
 
-  if (selected_analysis() == "trend") {
+    if (selected_analysis() == "trend") {
 
-    df <- d
+      req(input$trend_var, input$trend_countries)
 
-    if (input$trend_month != "All") {
-      df <- df %>% filter(month_name == input$trend_month)
-    }
+      df <- d
 
-    # Just like we do in the class, we take the dataset, I filter it based on the selected countries and month,
-    # then I group it by year and country name, and calculate the average value of the selected variable for each group.
+      if (!is.null(input$trend_month) && input$trend_month != "All") {
+        df <- df %>% filter(month_name == input$trend_month)
+      }
 
-    df <- df %>%
-      filter(country_name %in% input$trend_countries) %>%
-      group_by(year, country_name) %>%
-      summarise(value = mean(.data[[input$trend_var]], na.rm = TRUE), .groups = "drop")
+      df <- df %>%
+        filter(country_name %in% input$trend_countries) %>%
+        group_by(year, country_name) %>%
+        summarise(
+          value = mean(.data[[input$trend_var]], na.rm = TRUE),
+          .groups = "drop"
+        )
 
     # Now I can create a line plot using ggplot2 to show the trend of the selected variable over time for the selected countries, using what we already know
     # about plotting! 4 types of plots I have.
@@ -997,10 +989,12 @@ server <- function(input, output, session) {
 
   } else if (selected_analysis() == "top10") {
 
-    df <- d %>%
-      filter(year == input$top_year)
+    req(input$top_var, input$top_year)
 
-    if (input$top_region != "All") {
+    df <- d %>%
+      filter(year == input$year)
+
+    if (!is.null(input$top_region) && input$top_region != "All") {
       df <- df %>% filter(region == input$top_region)
     }
 
@@ -1028,8 +1022,10 @@ server <- function(input, output, session) {
 
   } else if (selected_analysis() == "region") {
 
+    req(input$region_var, input$region_year)
+
     df <- d %>%
-      filter(year == input$region_year)
+      filter(year == input$year)
 
     # Plotting the boxplot to compare the distribution of the selected variable across regions.
 
@@ -1051,8 +1047,11 @@ server <- function(input, output, session) {
 
   } else {
 
+
+    req(input$x_var, input$y_var, input$relation_year)
+
     df <- d %>%
-      filter(year == input$relation_year)
+      filter(year == input$year)
 
     if (input$relation_region != "All") {
       df <- df %>% filter(region == input$relation_region)
