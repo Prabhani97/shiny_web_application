@@ -16,7 +16,7 @@ library(bslib)
 library(DT)
 library(plotly)
 
-# Preparing data
+# Preparing data for the app
 
 d <- read_csv("global_climate_health_impact_tracker_2015_2025.csv")
 
